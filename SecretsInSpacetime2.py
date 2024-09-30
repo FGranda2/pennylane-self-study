@@ -30,14 +30,14 @@ def is_unsafe(alpha, beta, epsilon):
         (bool): 'True' if alpha and beta are epsilon-unsafe coefficients. 'False' in the other case.
 
     """
-    dev_test = qml.device("default.qubit", wires = [0,1], shots=10000)    
+    dev_test = qml.device("lightning.qubit", wires = [0,1], shots=10000)    
     
     @qml.qnode(dev_test)
     def my_quantum_function(alpha, beta, theta):
         # Apply U
         U_psi(theta=theta)      
 
-        return qml.counts(qml.prod(qml.RX(beta,0),qml.RZ(alpha,0))@qml.prod(qml.RX(beta,1),qml.RZ(alpha,1)))
+        return qml.expval(qml.prod(qml.RX(beta,0),qml.RZ(alpha,0))@qml.prod(qml.RX(beta,1),qml.RZ(alpha,1)))
         
 
     # Define the step size and the range
@@ -52,11 +52,11 @@ def is_unsafe(alpha, beta, epsilon):
     while theta <= end:
 
         counts = my_quantum_function(alpha,beta,theta)
-        total = 0
-        for i in counts:
-            total+=i*counts[i]
+        # total = 0
+        # for i in counts:
+        #     total+=i*counts[i]
 
-        total = LA.norm(total/10000)**2
+        total = LA.norm(counts)**2
         if total >= 1-epsilon:
             result = True
             break
